@@ -16,18 +16,23 @@ GROUP BY al.name;
 -- WHERE YEAR != 2020; 
 
 -- updated task #4:
-SELECT ar.name FROM artists ar
-JOIN albums al ON ar.id = al.id 
-WHERE YEAR != (
-	SELECT YEAR FROM albums
-	WHERE YEAR = 2020
-);
 
-SELECT col.name FROM collections col
-JOIN tracks tr ON col.id = tr.id 
-JOIN albums al ON tr.album_id = al.id 
-JOIN artists ar ON al.id = ar.id
-WHERE ar.name LIKE 'Nirvana';
+SELECT ar.id, ar.name FROM artists ar
+	JOIN artists_albums aa ON ar.id = aa.artist_id
+	JOIN albums al ON aa.album_id = al.id  
+	WHERE al.release_year!=2020
+	GROUP BY ar.id, ar.name
+	ORDER BY ar.id;
+
+
+SELECT DISTINCT(c.name) FROM collections col
+	JOIN collections_tracks ct ON c.id = ct.collection_id 
+	JOIN tracks t ON ct.track_id = t.id 
+	JOIN albums al ON t.id = al.id
+	JOIN artists_albums aa ON al.id = aa.artist_id 
+	JOIN artists a ON aa.artist_id = a.id  
+	WHERE a.name = 'Nirvana';
+
 
 SELECT al.name FROM albums al
 JOIN artistalbum aa ON al.id = aa.album_id 
@@ -39,13 +44,13 @@ SELECT tr.name, ct.collection_id  FROM tracks tr
 LEFT JOIN collectionstracks ct ON tr.id = ct.track_id 
 WHERE ct.collection_id IS NULL;
 
-SELECT ar.name FROM artists ar
-JOIN albums al ON ar.id = al.id
-JOIN tracks tr ON al.id = tr.album_id 
-WHERE tr.duration <= (
-	SELECT min(tracks.duration) FROM tracks
-)
-GROUP BY ar.name;
+
+SELECT DISTINCT ar.name FROM artists ar
+	JOIN artists_albums aa ON ar.id  = aa.artist_id 
+	JOIN albums al ON aa.album_id = al.id 
+	JOIN tracks tr ON tr.album_id = al.id
+	WHERE tr.duration = 
+		(SELECT MIN(duration) FROM tracks);
 
 -- SELECT al.name FROM albums al
 -- JOIN tracks tr ON al.id = tr.album_id 
